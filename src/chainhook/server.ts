@@ -44,6 +44,38 @@ async function registerChainhookPredicates(this: FastifyInstance) {
   );
 
   const register = async (name: string, uuid: string, blockHeight: number) => {
+    const network =
+      ENV.NETWORK === 'mainnet'
+        ? {
+            mainnet: {
+              start_block: blockHeight,
+              if_this: {
+                scope: 'ordinals_protocol',
+                operation: name,
+              },
+              then_that: {
+                http_post: {
+                  url: `http://${ENV.EXTERNAL_HOSTNAME}/chainhook/${name}`,
+                  authorization_header: `Bearer ${ENV.CHAINHOOK_NODE_AUTH_TOKEN}`,
+                },
+              },
+            },
+          }
+        : {
+            testnet: {
+              start_block: blockHeight,
+              if_this: {
+                scope: 'ordinals_protocol',
+                operation: name,
+              },
+              then_that: {
+                http_post: {
+                  url: `http://${ENV.EXTERNAL_HOSTNAME}/chainhook/${name}`,
+                  authorization_header: `Bearer ${ENV.CHAINHOOK_NODE_AUTH_TOKEN}`,
+                },
+              },
+            },
+          };
     await request(`${CHAINHOOK_BASE_PATH}/v1/chainhooks`, {
       method: 'POST',
       body: JSON.stringify({
@@ -51,21 +83,7 @@ async function registerChainhookPredicates(this: FastifyInstance) {
         name: name,
         version: 1,
         chain: 'bitcoin',
-        networks: {
-          mainnet: {
-            start_block: blockHeight,
-            if_this: {
-              scope: 'ordinals_protocol',
-              operation: name,
-            },
-            then_that: {
-              http_post: {
-                url: `http://${ENV.EXTERNAL_HOSTNAME}/chainhook/${name}`,
-                authorization_header: `Bearer ${ENV.CHAINHOOK_NODE_AUTH_TOKEN}`,
-              },
-            },
-          },
-        },
+        networks: { ...network },
       }),
       headers: { 'content-type': 'application/json' },
       throwOnError: true,

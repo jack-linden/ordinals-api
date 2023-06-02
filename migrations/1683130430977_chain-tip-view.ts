@@ -4,12 +4,13 @@ import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
 export function up(pgm: MigrationBuilder): void {
+  const block_height = process.env.NETWORK === 'mainnet' ? 767430 : 2413343;
   pgm.dropTable('chain_tip');
   pgm.createMaterializedView(
     'chain_tip',
     { data: true },
-    // Set block height 767430 (inscription #0 genesis) as default.
-    `SELECT GREATEST(MAX(block_height), 767430) AS block_height FROM locations`
+    // Set block height 767430 (inscription #0 genesis) as default. 2413343 for testnet
+    `SELECT GREATEST(MAX(block_height), ${block_height}) AS block_height FROM locations`
   );
 }
 

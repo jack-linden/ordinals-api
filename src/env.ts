@@ -13,7 +13,7 @@ const schema = Type.Object({
     { default: 'default', readonly: 'readonly', writeonly: 'writeonly' },
     { default: 'default' }
   ),
-
+  NETWORK: Type.Enum({ mainnet: 'mainnet', testnet: 'testnet' }, { default: 'mainnet' }),
   /** Hostname of the API server */
   API_HOST: Type.String({ default: '0.0.0.0' }),
   /** Port in which to serve the API */
